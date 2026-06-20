@@ -9,15 +9,15 @@ export default function GlobalError({ error, reset }) {
   const router = useRouter();
 
   useEffect(() => {
-    // Log the structural error breakdown to your telemetry console
     console.error("Next.js Error Boundary caught a crash:", error);
   }, [error]);
 
   return (
     <div className="min-h-screen w-full flex items-center justify-center bg-zinc-50 p-4">
       <div className="max-w-md w-full p-8 border border-zinc-200 bg-white rounded-3xl shadow-sm text-center space-y-6">
-        {/* Animated Alert Warning Shield Icon */}
-        <div className="w-14 h-14 rounded-2xl bg-amber-50 border border-amber-200 text-amber-600 flex items-center justify-center mx-auto shadow-xs">
+        {/* FIXED: Switched from "flex mx-auto" to "inline-flex". 
+            This forces it to stay a small box and perfectly centers it using the parent's text-center! */}
+        <div className="inline-flex items-center justify-center w-14 h-14 p-4 rounded-2xl bg-red-50 border border-red-200 text-red-600 shadow-xs">
           <FiAlertTriangle size={26} />
         </div>
 
@@ -40,7 +40,7 @@ export default function GlobalError({ error, reset }) {
             variant="flat"
             className="flex-1 font-semibold rounded-xl"
             startContent={<FiRefreshCw size={14} />}
-            onPress={() => reset()} // Next.js will try to re-render the segment automatically
+            onPress={() => reset()}
           >
             Try Again
           </Button>

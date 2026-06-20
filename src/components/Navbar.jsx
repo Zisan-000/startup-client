@@ -105,7 +105,7 @@ export default function Navbar() {
                   width={30}
                   height={30}
                   alt="userimage"
-                  className="rounded-full object-cover"
+                  className="rounded-full object-cover w-auto h-auto"
                 />
               </div>
             </Link>
@@ -171,7 +171,7 @@ export default function Navbar() {
                         width={30}
                         height={30}
                         alt="userimage"
-                        className="rounded-full object-cover"
+                        className="rounded-full object-cover w-auto h-auto"
                       />
                     </div>
                   </Link>
