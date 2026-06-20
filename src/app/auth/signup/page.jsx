@@ -29,7 +29,7 @@ const SignUp = () => {
     const formData = new FormData(e.currentTarget);
     const user = Object.fromEntries(formData.entries());
 
-    const plan = role === "founder" ? "free" : "";
+    const plan = role === "founder" ? "free" : "free";
 
     const { data, error } = await authClient.signUp.email({
       email: user.email,
@@ -38,6 +38,7 @@ const SignUp = () => {
       image: user.photoUrl,
       role: role,
       plan: plan,
+      isBlocked: false,
     });
 
     if (data) {

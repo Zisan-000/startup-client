@@ -5,20 +5,29 @@ import { Check } from "@gravity-ui/icons";
 import toast from "react-hot-toast";
 import { redirect } from "next/navigation";
 import { createOpportunity } from "@/lib/actions/opportunities";
+import { LuShieldAlert } from "react-icons/lu";
 
-export default function AddOpportunity({ startup }) {
+export default function AddOpportunity({ startup, startupStatus }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
+
   // console.log("AddOpportunity Component - Startup Prop:", startup?.id);
   const startupId = startup?.id || "current_startup_id";
 
+  const isApproved = startupStatus === "approved";
+  const isRejected = startupStatus === "rejected";
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!isApproved) {
+      toast.error("Unapproved profiles cannot publish positions.");
+      return;
+    }
     setIsSubmitting(false);
 
     const formData = new FormData(e.currentTarget);
 
     const opportunityData = {
-      startup_id: startup?.startupId || formData.get("startupId"),
+      startup_id: startup?.id || formData.get("startupId"),
       role_title: formData.get("roleTitle"),
       required_skills: formData.get("requiredSkills"),
       work_type: formData.get("workType"),
@@ -38,6 +47,34 @@ export default function AddOpportunity({ startup }) {
       toast.error("Failed to post opportunity.");
     }
   };
+
+  if (!isApproved) {
+    return (
+      <div className="min-h-[60vh] w-full flex items-center justify-center bg-zinc-50 p-4">
+        <div className="w-full max-w-md bg-white border border-zinc-200 rounded-2xl shadow-sm p-6 sm:p-8 text-center space-y-5">
+          <div className="w-12 h-12 rounded-xl bg-amber-50 border border-amber-100 flex items-center justify-center mx-auto text-amber-600">
+            <LuShieldAlert size={22} />
+          </div>
+          <div className="space-y-2">
+            <h2 className="text-xl font-bold text-zinc-900">
+              Verification Required
+            </h2>
+
+            <span className="  font-semibold">
+              <p className="text-sm text-zinc-500 leading-relaxed">
+                Your startup profile status is:{" "}
+                <span className="text-blue-500 font-bold">{startupStatus}</span>
+              </p>
+            </span>
+          </div>
+          <p className="text-xs text-zinc-400 bg-zinc-50 border border-zinc-100 p-3 rounded-xl">
+            Admin validation keeps our marketplace safe. You will be cleared to
+            publish positions once review cycles close.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen w-full flex items-center justify-center bg-zinc-50 p-4 py-12">

@@ -11,26 +11,34 @@ import {
   Select,
   Description,
   ListBox,
-  Textarea,
-  TextArea, // FIXED: Changed from TextArea to Textarea
+  TextArea,
 } from "@heroui/react";
-import { Check, ArrowShapeUpToLine } from "@gravity-ui/icons";
+import {
+  Check,
+  ArrowShapeUpToLine,
+  House,
+  Envelope,
+  Tag,
+  BellDot,
+  ShieldAlert,
+} from "@gravity-ui/icons";
 import toast from "react-hot-toast";
 import { createStartup } from "@/lib/actions/startups";
-import { redirect } from "next/navigation";
+import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { authClient } from "@/lib/auth-client";
+import { FaShield } from "react-icons/fa6";
 
-export default function CreateStartup({ startup }) {
+export default function CreateStartup({ startup, startups }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [imagePreview, setImagePreview] = useState(null);
   const { data: session, isPending } = authClient.useSession();
   const user = session?.user;
+  const router = useRouter();
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      // Creates a temporary local URL for the selected file
       setImagePreview(URL.createObjectURL(file));
     } else {
       setImagePreview(null);
@@ -50,7 +58,6 @@ export default function CreateStartup({ startup }) {
       return;
     }
 
-    // 1. Handle ImgBB Upload
     const imgbbFormData = new FormData();
     imgbbFormData.append("image", file);
 
@@ -80,41 +87,144 @@ export default function CreateStartup({ startup }) {
 
     const logoUrl = imgbbData.data.url;
 
-    // 2. Build Form Payload (ADDED: status: "pending")
     const startupData = {
-      name: formData.get("startupName"),
+      startup_name: formData.get("startupName"),
       industry: formData.get("industry"),
       description: formData.get("description"),
       fundingStage: formData.get("fundingStage"),
       founderEmail: user?.email,
       logo: logoUrl,
       status: "pending",
-      startupId: startup?.startupId || "startup123",
+      startupId: startup?.id || "startup123",
     };
 
-    // 3. Database Insertion & Redirect Flow
     const res = await createStartup(startupData);
-
     setIsSubmitting(false);
 
     if (res?.insertedId) {
       toast.success("Startup created successfully!");
       setImagePreview(null);
       e.target.reset();
-      redirect("/dashboard/founder");
+      router.push("/dashboard/founder");
     } else {
       toast.error("Failed to create the startup record in the database.");
     }
   };
 
+  // 1. CONDITIONAL DISPLAY: If a startup profile already exists, show details card instead of form
+  if (startups && startups.length === 1) {
+    const activeStartup = startups[0];
+
+    const statusStyles = {
+      pending: "bg-amber-50 text-amber-700 border-amber-200",
+      approved: "bg-emerald-50 text-emerald-700 border-emerald-200",
+      rejected: "bg-rose-50 text-rose-700 border-rose-200",
+    };
+
+    return (
+      <div className="min-h-screen w-full flex items-center justify-center bg-zinc-50 p-4 py-12">
+        <Card className="w-full max-w-xl p-6 sm:p-8 bg-white border border-zinc-200 rounded-2xl shadow-sm space-y-6">
+          <div className="flex items-center justify-between border-b border-zinc-100 pb-4">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-xl bg-zinc-50 border border-zinc-200 flex items-center justify-center overflow-hidden p-1">
+                {activeStartup.logo ? (
+                  <Image
+                    width={200}
+                    height={200}
+                    src={activeStartup.logo}
+                    alt="Startup Logo"
+                    className="w-full h-full object-contain"
+                  />
+                ) : (
+                  <House size={20} className="text-zinc-400" />
+                )}
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold tracking-tight text-zinc-900">
+                  {activeStartup.name}
+                </h1>
+                <p className="text-xs text-zinc-400">
+                  Registered Startup Profile
+                </p>
+              </div>
+            </div>
+            <span
+              className={`px-2.5 py-0.5 rounded-full text-xs font-semibold border capitalize ${statusStyles[activeStartup.status] || "bg-zinc-50 text-zinc-600"}`}
+            >
+              {activeStartup.status || "pending"}
+            </span>
+          </div>
+
+          <div className="space-y-4">
+            <div className="text-sm text-zinc-600 leading-relaxed bg-zinc-50 p-4 rounded-xl border border-zinc-100">
+              <p className="font-medium text-zinc-400 text-xs uppercase tracking-wider mb-1">
+                Company Vision
+              </p>
+              {activeStartup.description}
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 pt-2">
+              <div className="flex items-center gap-2.5 text-sm text-zinc-600 bg-zinc-50/50 p-3 rounded-xl border border-zinc-100">
+                <Tag size={16} className="text-zinc-400" />
+                <div>
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">
+                    Industry
+                  </p>
+                  <p className="font-semibold text-zinc-800 uppercase text-xs">
+                    {activeStartup.industry || "General"}
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2.5 text-sm text-zinc-600 bg-zinc-50/50 p-3 rounded-xl border border-zinc-100">
+                <BellDot size={16} className="text-zinc-400" />
+                <div>
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">
+                    Funding Stage
+                  </p>
+                  <p className="font-semibold text-zinc-800 capitalize text-xs">
+                    {activeStartup.fundingStage || "Idea"}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2.5 text-sm text-zinc-600 bg-zinc-50/50 p-3 rounded-xl border border-zinc-100">
+              <Envelope size={16} className="text-zinc-400" />
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">
+                  Founder Operations Email
+                </p>
+                <p className="font-semibold text-zinc-800 text-xs">
+                  {activeStartup.founderEmail}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {activeStartup.status !== "approved" && (
+            <div className="flex items-start gap-2.5 p-3 rounded-xl border border-amber-100 bg-amber-50/40 text-xs text-amber-800">
+              <FaShield size={16} className="mt-0.5 shrink-0" />
+              <p>
+                Your profile is locked under administrative screening. You will
+                unlock opportunity deployment once verification clears.
+              </p>
+            </div>
+          )}
+        </Card>
+      </div>
+    );
+  }
+
+  // 2. DEFAULT DISPLAY: Show standard registration form if no startup profile is loaded
   return (
-    <div className="min-h-screen w-full flex items-center justify-center bg-zinc-50 dark:bg-zinc-900 p-4 py-12">
-      <Card className="w-full max-w-xl p-6 sm:p-8 bg-white dark:bg-zinc-800 rounded-2xl border border-zinc-200 dark:border-zinc-700/50 shadow-sm space-y-6">
+    <div className="min-h-screen w-full flex items-center justify-center bg-zinc-50 p-4 py-12">
+      <Card className="w-full max-w-xl p-6 sm:p-8 bg-white border border-zinc-200 rounded-2xl shadow-sm space-y-6">
         <div className="space-y-2 text-center">
-          <h1 className="text-3xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">
+          <h1 className="text-3xl font-bold tracking-tight text-zinc-900">
             Register your Startup
           </h1>
-          <p className="text-sm text-zinc-500 dark:text-zinc-400">
+          <p className="text-sm text-zinc-500">
             Share your vision and connect with potential collaborators
           </p>
         </div>
@@ -122,7 +232,7 @@ export default function CreateStartup({ startup }) {
         <Form onSubmit={handleSubmit} className="flex flex-col gap-5">
           {/* Startup Name */}
           <TextField isRequired name="startupName" type="text">
-            <Label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+            <Label className="text-sm font-medium text-zinc-700">
               Startup Name
             </Label>
             <Input placeholder="e.g., ForgeAI" />
@@ -130,10 +240,10 @@ export default function CreateStartup({ startup }) {
 
           {/* Logo File Upload */}
           <div className="flex flex-col gap-2">
-            <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+            <label className="text-sm font-medium text-zinc-700">
               Startup Logo <span className="text-danger">*</span>
             </label>
-            <div className="border-2 border-dashed border-zinc-200 dark:border-zinc-700 rounded-xl p-4 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition relative flex flex-col items-center justify-center gap-2 cursor-pointer min-h-30">
+            <div className="border-2 border-dashed border-zinc-200 rounded-xl p-4 hover:bg-zinc-50 transition relative flex flex-col items-center justify-center gap-2 cursor-pointer min-h-30">
               {imagePreview ? (
                 <div className="flex flex-col items-center gap-2">
                   <Image
@@ -160,7 +270,7 @@ export default function CreateStartup({ startup }) {
                 type="file"
                 name="logo"
                 accept="image/*"
-                onChange={handleFileChange} // FIXED: Added missing change event handler
+                onChange={handleFileChange}
                 className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
               />
             </div>
@@ -169,7 +279,7 @@ export default function CreateStartup({ startup }) {
           {/* Industry Selection */}
           <div className="flex flex-col gap-1">
             <Select isRequired name="industry" defaultValue="saas">
-              <Label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+              <Label className="text-sm font-medium text-zinc-700">
                 Industry
               </Label>
               <Select.Trigger>
@@ -204,7 +314,7 @@ export default function CreateStartup({ startup }) {
           {/* Funding Stage Selection */}
           <div className="flex flex-col gap-1">
             <Select isRequired name="fundingStage" defaultValue="seed">
-              <Label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+              <Label className="text-sm font-medium text-zinc-700">
                 Funding Stage
               </Label>
               <Select.Trigger>
@@ -238,7 +348,7 @@ export default function CreateStartup({ startup }) {
 
           {/* Founder Email */}
           <TextField isRequired name="founderEmail" type="email">
-            <Label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+            <Label className="text-sm font-medium text-zinc-700">
               Founder Email
             </Label>
             <Input placeholder={user?.email} readOnly />
@@ -246,10 +356,10 @@ export default function CreateStartup({ startup }) {
 
           {/* Description */}
           <div className="w-full flex flex-col gap-1">
-            <Label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+            <Label className="text-sm font-medium text-zinc-700">
               Description
             </Label>
-            <TextArea // FIXED: Component case normalization
+            <TextArea
               isRequired
               name="description"
               placeholder="Tell us about your startup's mission and product..."
@@ -262,7 +372,7 @@ export default function CreateStartup({ startup }) {
             <Button
               type="submit"
               isLoading={isSubmitting}
-              className="flex-1 font-medium bg-zinc-900 text-white dark:bg-zinc-50 dark:text-zinc-900 hover:opacity-90"
+              className="flex-1 font-medium bg-zinc-900 text-white hover:opacity-90"
             >
               {!isSubmitting && <Check className="w-4 h-4" />}
               Publish Startup

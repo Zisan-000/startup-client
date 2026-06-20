@@ -4,11 +4,15 @@ import AddOpportunity from "./AddOpportunity";
 import { getOpportunities } from "@/lib/api/opportunities";
 import { CircleInfo, Flame } from "@gravity-ui/icons";
 import Link from "next/link";
+import { getStartups } from "@/lib/api/startups";
 
 const OpportunitiesPage = async () => {
   const user = await getUserSession();
   const initialOpportunities = await getOpportunities(user?.id);
+  const startups = await getStartups(user?.id);
+  const startupStatus = startups?.[0]?.status;
   const opportunitiesCount = initialOpportunities?.length || 0;
+  // console.log("Opportunities loaded on server:", initialOpportunities);
 
   // Plan configuration: Check if user has upgraded to premium
   const isPremium = user?.plan === "premium";
@@ -93,7 +97,7 @@ const OpportunitiesPage = async () => {
                   Configure Requirements Profile
                 </span>
               </div>
-              <AddOpportunity startup={user} />
+              <AddOpportunity startupStatus={startupStatus} startup={user} />
             </div>
           </div>
         </div>

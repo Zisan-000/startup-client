@@ -29,12 +29,22 @@ const LoginPage = () => {
       password: user.password,
     });
 
-    if (data) {
+    if (error) {
+      return toast.error(error.message || "Invalid credentials");
+    }
+
+    if (data?.user) {
+      if (data.user.isBlocked === true) {
+        toast.error(
+          "Your account has been suspended. Please contact administration.",
+        );
+
+        await authClient.signOut();
+        return;
+      }
+
       toast.success("Logged In successfully");
       router.push(redirectUrl);
-    }
-    if (error) {
-      toast.error("Error:", error);
     }
   };
 
