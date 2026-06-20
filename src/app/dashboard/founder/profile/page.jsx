@@ -34,7 +34,7 @@ const FounderProfile = async () => {
   // 3. Centralized role config adjustments for UI badges
   const roleThemes = {
     founder: {
-      label: "Venture Founder",
+      label: "Founder",
       styles: "bg-blue-50 text-blue-700 border-blue-200",
       icon: <FiBriefcase size={12} />,
     },
@@ -51,7 +51,7 @@ const FounderProfile = async () => {
   };
 
   const activeRole =
-    roleThemes[user.role?.toLowerCase()] || roleThemes.collaborator;
+    roleThemes[user?.role?.toLowerCase()] || roleThemes.collaborator;
 
   return (
     <div className="max-w-4xl mx-auto p-6 bg-zinc-50/30 min-h-screen space-y-6">
