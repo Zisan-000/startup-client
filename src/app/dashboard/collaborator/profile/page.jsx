@@ -26,19 +26,19 @@ const CollaboratorProfile = async () => {
     );
   }
 
+  const url =
+    "https://startup-server-khaki.vercel.app" || "http://localhost:5000";
+
   let user = null;
   try {
-    const res = await fetch(
-      `http://localhost:5000/api/users/profile?email=${session.email}`,
-      {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          ...headersConfig,
-        },
-        cache: "no-store",
+    const res = await fetch(`${url}/api/users/profile?email=${session.email}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        ...headersConfig,
       },
-    );
+      cache: "no-store",
+    });
 
     if (res.ok) {
       user = await res.json();

@@ -43,7 +43,7 @@ export default async function Success({ searchParams }) {
 
     const result = await createPayments(info);
 
-    console.log("Constructed Payment Info Payload:", info);
+    // console.log("Constructed Payment Info Payload:", info);
 
     return (
       <div className="min-h-screen w-full bg-zinc-50 flex items-center justify-center p-4 sm:p-6">

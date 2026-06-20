@@ -37,7 +37,7 @@ export default function BrowseOpportunitiesSection({
         if (activeFilters.page) params.append("page", activeFilters.page);
 
         const res = await fetch(
-          `http://localhost:5000/api/opportunities?${params.toString()}`,
+          `https://startup-server-khaki.vercel.app/api/opportunities?${params.toString()}`,
         );
         if (!res.ok) throw new Error("Network error fetching query results");
 

@@ -12,7 +12,7 @@ import {
 const MyApplications = async () => {
   const user = await getUserSession();
   const applications = (await getApplicationsByApplicant(user?.email)) || [];
-  console.log("Applications loaded on server:", applications);
+  // console.log("Applications loaded on server:", applications);
 
   // Helper mapping to style status badges cleanly
   const statusStyles = {

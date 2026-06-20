@@ -15,8 +15,8 @@ export default async function FounderDashboardPage() {
     user?.id ? getOpportunities(user.id).catch(() => []) : [],
     user?.email ? getApplicationsByFounder(user.email).catch(() => []) : [],
   ]);
-  console.log("FounderDashboardPage startups:", opportunities);
-  console.log("FounderDashboardPage applications:", applications);
+  // console.log("FounderDashboardPage startups:", opportunities);
+  // console.log("FounderDashboardPage applications:", applications);
   const totalOpportunitiesCount = opportunities.length;
 
   const totalApplicationsCount = applications.length;
