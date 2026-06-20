@@ -10,11 +10,13 @@ import {
 } from "react-icons/fi";
 import Image from "next/image";
 import ProfileEditForm from "@/components/ProfileEditForm";
+import { authHeader } from "@/lib/core/server";
 
 export const dynamic = "force-dynamic";
 
 const CollaboratorProfile = async () => {
   const session = await getUserSession();
+  const headersConfig = await authHeader();
 
   if (!session?.email) {
     return (
@@ -29,6 +31,11 @@ const CollaboratorProfile = async () => {
     const res = await fetch(
       `http://localhost:5000/api/users/profile?email=${session.email}`,
       {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          ...headersConfig,
+        },
         cache: "no-store",
       },
     );

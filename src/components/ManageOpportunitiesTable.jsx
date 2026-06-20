@@ -1,10 +1,15 @@
 "use client";
 
 import React, { useState } from "react";
+
 import { FiTrash2, FiEdit3, FiCheck, FiX } from "react-icons/fi";
-import { Button } from "@heroui/react";
+
+import { Button, AlertDialog } from "@heroui/react";
+
 import toast from "react-hot-toast";
+
 import { useRouter } from "next/navigation";
+
 import {
   updateOpportunityInfo,
   deleteOpportunityInfo,
@@ -14,28 +19,30 @@ export default function ManageOpportunitiesTable({ initialOpportunities }) {
   const [opportunities, setOpportunities] = useState(
     initialOpportunities || [],
   );
+
   const [editingId, setEditingId] = useState(null);
+
   const [isProcessing, setIsProcessing] = useState(false);
+
   const router = useRouter();
 
   // --- ACTIONS ---
-  const handleDelete = async (id, title) => {
-    const confirmDelete = window.confirm(
-      `Are you sure you want to permanently remove the role: "${title}"?`,
-    );
-    if (!confirmDelete) return;
 
+  const handleDelete = async (id) => {
     setIsProcessing(true);
+
     try {
       const result = await deleteOpportunityInfo(id);
 
       if (result) {
         toast.success("Opportunity removed successfully.");
+
         setOpportunities((prev) =>
           prev.filter(
             (item) => (item._id?.toString() || item._id || item.id) !== id,
           ),
         );
+
         router.refresh();
       }
     } catch (err) {
@@ -47,24 +54,31 @@ export default function ManageOpportunitiesTable({ initialOpportunities }) {
 
   const handleUpdateSubmit = async (e, id) => {
     e.preventDefault();
+
     setIsProcessing(true);
 
     const formData = new FormData(e.currentTarget);
 
     const updatedPayload = {
       role_title: formData.get("role_title"),
+
       work_type: formData.get("work_type"),
+
       commitment_level: formData.get("commitment_level"),
+
       required_skills: formData.get("required_skills"),
+
       deadline: formData.get("deadline"),
     };
 
     try {
       const result = await updateOpportunityInfo(id, updatedPayload);
+
       //   console.log("Opportunity updated:", result);
 
       if (result) {
         toast.success("Opportunity synchronized successfully.");
+
         setOpportunities((prev) =>
           prev.map((item) =>
             (item._id?.toString() || item._id || item.id) === id
@@ -72,7 +86,9 @@ export default function ManageOpportunitiesTable({ initialOpportunities }) {
               : item,
           ),
         );
+
         setEditingId(null);
+
         router.refresh();
       }
     } catch (err) {
@@ -90,18 +106,23 @@ export default function ManageOpportunitiesTable({ initialOpportunities }) {
             <th className="p-4 text-xs font-semibold uppercase tracking-wider text-zinc-500">
               Role Title
             </th>
+
             <th className="p-4 text-xs font-semibold uppercase tracking-wider text-zinc-500">
               Work Type
             </th>
+
             <th className="p-4 text-xs font-semibold uppercase tracking-wider text-zinc-500">
               Commitment
             </th>
+
             <th className="p-4 text-xs font-semibold uppercase tracking-wider text-zinc-500">
               Required Skills
             </th>
+
             <th className="p-4 text-xs font-semibold uppercase tracking-wider text-zinc-500">
               Deadline
             </th>
+
             <th className="p-4 text-xs font-semibold uppercase tracking-wider text-zinc-500 text-center">
               Actions
             </th>
@@ -111,6 +132,7 @@ export default function ManageOpportunitiesTable({ initialOpportunities }) {
         <tbody className="divide-y divide-zinc-100">
           {opportunities.map((opp) => {
             const rowId = opp._id?.toString() || opp._id || opp.id;
+
             const isEditing = editingId === rowId;
 
             if (isEditing) {
@@ -126,6 +148,7 @@ export default function ManageOpportunitiesTable({ initialOpportunities }) {
                           <label className="text-[11px] font-bold text-zinc-500 uppercase tracking-wider">
                             Role Title
                           </label>
+
                           <input
                             required
                             name="role_title"
@@ -133,10 +156,12 @@ export default function ManageOpportunitiesTable({ initialOpportunities }) {
                             className="px-3 py-1.5 text-sm border border-zinc-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-950 bg-white text-zinc-900"
                           />
                         </div>
+
                         <div className="flex flex-col gap-1">
                           <label className="text-[11px] font-bold text-zinc-500 uppercase tracking-wider">
                             Work Type
                           </label>
+
                           <select
                             required
                             name="work_type"
@@ -144,14 +169,18 @@ export default function ManageOpportunitiesTable({ initialOpportunities }) {
                             className="px-3 py-1.5 text-sm border border-zinc-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-950 bg-white text-zinc-900"
                           >
                             <option value="Remote">Remote</option>
+
                             <option value="On-site">On-site</option>
+
                             <option value="Hybrid">Hybrid</option>
                           </select>
                         </div>
+
                         <div className="flex flex-col gap-1">
                           <label className="text-[11px] font-bold text-zinc-500 uppercase tracking-wider">
                             Commitment Level
                           </label>
+
                           <select
                             required
                             name="commitment_level"
@@ -159,8 +188,11 @@ export default function ManageOpportunitiesTable({ initialOpportunities }) {
                             className="px-3 py-1.5 text-sm border border-zinc-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-950 bg-white text-zinc-900"
                           >
                             <option value="Full-time">Full-time</option>
+
                             <option value="Part-time">Part-time</option>
+
                             <option value="Contract">Contract</option>
+
                             <option value="Internship">Internship</option>
                           </select>
                         </div>
@@ -171,6 +203,7 @@ export default function ManageOpportunitiesTable({ initialOpportunities }) {
                           <label className="text-[11px] font-bold text-zinc-500 uppercase tracking-wider">
                             Required Skills (Comma separated)
                           </label>
+
                           <input
                             required
                             name="required_skills"
@@ -178,10 +211,12 @@ export default function ManageOpportunitiesTable({ initialOpportunities }) {
                             className="px-3 py-1.5 text-sm border border-zinc-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-950 bg-white text-zinc-900"
                           />
                         </div>
+
                         <div className="flex flex-col gap-1">
                           <label className="text-[11px] font-bold text-zinc-500 uppercase tracking-wider">
                             Application Deadline
                           </label>
+
                           <input
                             required
                             type="date"
@@ -206,6 +241,7 @@ export default function ManageOpportunitiesTable({ initialOpportunities }) {
                         >
                           Cancel
                         </Button>
+
                         <Button
                           type="submit"
                           size="sm"
@@ -229,16 +265,19 @@ export default function ManageOpportunitiesTable({ initialOpportunities }) {
                     {opp.role_title}
                   </span>
                 </td>
+
                 <td className="p-4">
                   <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-50 text-blue-700 uppercase">
                     {opp.work_type}
                   </span>
                 </td>
+
                 <td className="p-4">
                   <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-50 text-purple-700 uppercase">
                     {opp.commitment_level}
                   </span>
                 </td>
+
                 <td className="p-4 max-w-xs">
                   <div className="flex flex-wrap gap-1 max-w-60">
                     {opp.required_skills?.split(",").map((skill, i) => (
@@ -251,8 +290,10 @@ export default function ManageOpportunitiesTable({ initialOpportunities }) {
                     ))}
                   </div>
                 </td>
+
                 <td className="p-4">
                   {/* CLEAN & SIMPLE DATE RENDERING WITH HYDRATION FIX */}
+
                   <span
                     className="text-sm text-zinc-600"
                     suppressHydrationWarning
@@ -262,6 +303,7 @@ export default function ManageOpportunitiesTable({ initialOpportunities }) {
                       : "N/A"}
                   </span>
                 </td>
+
                 <td className="p-4">
                   <div className="flex items-center justify-center gap-1.5">
                     <Button
@@ -274,16 +316,55 @@ export default function ManageOpportunitiesTable({ initialOpportunities }) {
                     >
                       <FiEdit3 size={16} />
                     </Button>
-                    <Button
-                      isIconOnly
-                      variant="light"
-                      isDisabled={isProcessing}
-                      onPress={() => handleDelete(rowId, opp.role_title)}
-                      className="text-zinc-500 hover:text-red-600 rounded-xl"
-                      title="Purge Opportunity"
-                    >
-                      <FiTrash2 size={16} />
-                    </Button>
+
+                    {/* PERFECTED HEROUI ALERT DIALOG STRUCTURE */}
+                    <AlertDialog>
+                      <Button
+                        isIconOnly
+                        variant="light"
+                        isDisabled={isProcessing}
+                        className="text-zinc-500 hover:text-red-600 rounded-xl min-w-0 w-auto h-auto transition-all"
+                        title="Purge Opportunity"
+                      >
+                        <FiTrash2 size={16} />
+                      </Button>
+
+                      <AlertDialog.Backdrop>
+                        <AlertDialog.Container>
+                          <AlertDialog.Dialog className="sm:max-w-100">
+                            <AlertDialog.CloseTrigger />
+
+                            <AlertDialog.Header>
+                              <AlertDialog.Icon status="danger" />
+                              <AlertDialog.Heading>
+                                Remove Opportunity?
+                              </AlertDialog.Heading>
+                            </AlertDialog.Header>
+
+                            <AlertDialog.Body>
+                              <p>
+                                Are you sure you want to permanently remove the
+                                role <strong>{opp.role_title}</strong>? This
+                                action cannot be undone.
+                              </p>
+                            </AlertDialog.Body>
+
+                            <AlertDialog.Footer>
+                              <Button slot="close" variant="tertiary">
+                                Cancel
+                              </Button>
+                              <Button
+                                slot="close"
+                                variant="danger"
+                                onPress={() => handleDelete(rowId)}
+                              >
+                                Confirm Delete
+                              </Button>
+                            </AlertDialog.Footer>
+                          </AlertDialog.Dialog>
+                        </AlertDialog.Container>
+                      </AlertDialog.Backdrop>
+                    </AlertDialog>
                   </div>
                 </td>
               </tr>

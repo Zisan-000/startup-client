@@ -6,6 +6,7 @@ import { getStartups } from "@/lib/api/startups";
 const StartupPage = async () => {
   const user = await getUserSession();
   const startups = await getStartups(user?.id);
+  // console.log(startups);
   return (
     <div>
       <CreateStartup startup={user} startups={startups} />

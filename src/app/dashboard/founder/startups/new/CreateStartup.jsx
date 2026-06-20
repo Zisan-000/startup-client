@@ -110,9 +110,9 @@ export default function CreateStartup({ startup, startups }) {
       toast.error("Failed to create the startup record in the database.");
     }
   };
-
+  console.log(startups);
   // 1. CONDITIONAL DISPLAY: If a startup profile already exists, show details card instead of form
-  if (startups && startups.length === 1) {
+  if (startups && startups.length >= 1) {
     const activeStartup = startups[0];
 
     const statusStyles = {

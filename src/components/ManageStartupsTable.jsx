@@ -1,6 +1,6 @@
 "use client";
 
-import React, { act, useState } from "react";
+import React, { useState } from "react";
 import { BiUser } from "react-icons/bi";
 import {
   FiTrash2,
@@ -13,7 +13,7 @@ import {
 import { HiOutlineBuildingOffice, HiOutlineTag } from "react-icons/hi2";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
-import { Button, TextArea } from "@heroui/react";
+import { Button, Textarea, AlertDialog, TextArea } from "@heroui/react"; // Fixed TextArea to Textarea
 import { deleteStartupInfo, updateStartupInfo } from "@/lib/actions/startups";
 import Image from "next/image";
 
@@ -36,15 +36,10 @@ export default function ManageStartupsTable({ initialStartups }) {
 
   const id = activeStartup.startupId || activeStartup._id?.toString();
 
-  // --- DELETE ACTION (NATIVE ALERT) ---
-  const handleDelete = async () => {
-    const confirmDelete = window.confirm(
-      `Are you completely sure you want to permanently delete ${activeStartup.name}? This action cannot be undone.`,
-    );
-
-    if (!confirmDelete) return;
-
+  // --- DELETE ACTION (HEROUI DIALOG) ---
+  const executeDeleteAction = async () => {
     setIsProcessing(true);
+
     try {
       // Call the clean server mutation helper
       const result = await deleteStartupInfo(id);
@@ -148,7 +143,7 @@ export default function ManageStartupsTable({ initialStartups }) {
                 required
                 name="name"
                 defaultValue={activeStartup.name || activeStartup.startup_name}
-                className="w-full px-3 py-2 text-sm border border-zinc-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-950 transition bg-white text-zinc-900"
+                className="w-full px-3 py-2 text-sm border border-zinc-300 rounded-xl focus:outline-hidden focus:ring-2 focus:ring-zinc-950 transition bg-white text-zinc-900"
               />
             </div>
 
@@ -161,9 +156,10 @@ export default function ManageStartupsTable({ initialStartups }) {
                   required
                   name="industry"
                   defaultValue={activeStartup.industry}
-                  className="w-full px-3 py-2 text-sm border border-zinc-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-950 transition bg-white text-zinc-900"
+                  className="w-full px-3 py-2 text-sm border border-zinc-300 rounded-xl focus:outline-hidden focus:ring-2 focus:ring-zinc-950 transition bg-white text-zinc-900"
                 />
               </div>
+
               <div className="flex flex-col gap-1.5">
                 <label className="text-xs font-semibold text-zinc-600">
                   Funding Round
@@ -174,7 +170,7 @@ export default function ManageStartupsTable({ initialStartups }) {
                   defaultValue={
                     activeStartup.fundingStage || activeStartup.funding_stage
                   }
-                  className="w-full px-3 py-2 text-sm border border-zinc-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-950 transition bg-white text-zinc-900"
+                  className="w-full px-3 py-2 text-sm border border-zinc-300 rounded-xl focus:outline-hidden focus:ring-2 focus:ring-zinc-950 transition bg-white text-zinc-900"
                 />
               </div>
             </div>
@@ -189,6 +185,10 @@ export default function ManageStartupsTable({ initialStartups }) {
                 defaultValue={activeStartup.description}
                 minRows={3}
                 className="w-full"
+                classNames={{
+                  inputWrapper:
+                    "border-zinc-300 hover:border-zinc-400 focus-within:!border-zinc-950 p-3",
+                }}
               />
             </div>
           </div>
@@ -198,14 +198,14 @@ export default function ManageStartupsTable({ initialStartups }) {
         <>
           <div className="flex items-center justify-between border-b border-zinc-100 pb-4">
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-xl bg-zinc-50 border border-zinc-200 flex items-center justify-center overflow-hidden p-1 shrink-0">
+              <div className="w-12 h-12 rounded-xl bg-zinc-50 border border-zinc-200 flex items-center justify-center overflow-hidden p-1 shrink-0 relative">
                 {activeStartup.logo ? (
                   <Image
-                    width={40}
-                    height={40}
+                    fill
+                    sizes="40px"
                     src={activeStartup.logo}
                     alt="Logo"
-                    className="w-full h-full object-contain"
+                    className="object-contain p-0.5"
                   />
                 ) : (
                   <HiOutlineBuildingOffice
@@ -214,12 +214,16 @@ export default function ManageStartupsTable({ initialStartups }) {
                   />
                 )}
               </div>
+
               <div>
                 <h2 className="text-xl font-bold text-zinc-900 capitalize">
-                  {activeStartup.name}
+                  {activeStartup.name || activeStartup.startup_name}
                 </h2>
                 <span
-                  className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold tracking-wider border border-zinc-200 uppercase mt-1 ${statusStyles[activeStartup.status] || "bg-zinc-50 text-zinc-600"}`}
+                  className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold tracking-wider border border-zinc-200 uppercase mt-1 ${
+                    statusStyles[activeStartup.status] ||
+                    "bg-zinc-50 text-zinc-600"
+                  }`}
                 >
                   {activeStartup.status || "pending"}
                 </span>
@@ -239,16 +243,61 @@ export default function ManageStartupsTable({ initialStartups }) {
                 >
                   <FiEdit3 size={16} />
                 </Button>
-                <Button
-                  isIconOnly
-                  variant="light"
-                  isDisabled={isProcessing}
-                  onPress={handleDelete}
-                  className="text-zinc-500 hover:text-red-600 rounded-xl"
-                  title="Delete Startup Profile"
-                >
-                  <FiTrash2 size={16} />
-                </Button>
+
+                <AlertDialog>
+                  {/* Trigger Button */}
+                  <Button
+                    isIconOnly
+                    variant="light"
+                    isDisabled={isProcessing}
+                    title="Delete Startup Profile"
+                    className="text-zinc-500 hover:text-red-600 rounded-xl transition-all"
+                  >
+                    <FiTrash2 size={16} />
+                  </Button>
+
+                  {/* Dialog Content */}
+                  <AlertDialog.Backdrop>
+                    <AlertDialog.Container>
+                      <AlertDialog.Dialog className="sm:max-w-100">
+                        <AlertDialog.CloseTrigger />
+
+                        <AlertDialog.Header>
+                          <AlertDialog.Icon status="danger" />
+                          <AlertDialog.Heading>
+                            Delete Startup Profile?
+                          </AlertDialog.Heading>
+                        </AlertDialog.Header>
+
+                        <AlertDialog.Body>
+                          <p>
+                            Are you completely sure you want to permanently
+                            delete{" "}
+                            <strong>
+                              {activeStartup.name || activeStartup.startup_name}
+                            </strong>
+                            ? This action cannot be undone and will erase your
+                            workspace.
+                          </p>
+                        </AlertDialog.Body>
+
+                        <AlertDialog.Footer>
+                          <Button slot="close" variant="tertiary">
+                            Cancel
+                          </Button>
+                          <Button
+                            slot="close"
+                            variant="danger"
+                            onPress={executeDeleteAction}
+                            isLoading={isProcessing}
+                          >
+                            Confirm Delete
+                          </Button>
+                        </AlertDialog.Footer>
+                      </AlertDialog.Dialog>
+                    </AlertDialog.Container>
+                  </AlertDialog.Backdrop>
+                </AlertDialog>
               </div>
             )}
           </div>

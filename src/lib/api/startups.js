@@ -1,12 +1,11 @@
-import { serverFetch } from "../core/server";
+import { protectedFetch, serverFetch } from "../core/server";
 
 const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
 export const getStartups = async (startupId) => {
-  const res = await fetch(`${baseUrl}/api/my/startups?startupId=${startupId}`);
-  return res.json();
+  return protectedFetch(`/api/my/startups?startupId=${startupId}`);
 };
 
 export const getStartup = async () => {
-  return serverFetch(`/api/startups`);
+  return protectedFetch(`/api/startups`);
 };
