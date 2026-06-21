@@ -102,7 +102,7 @@ export default function AdminHomeClient({ stats }) {
           </div>
 
           <div className="h-56 w-full pt-2 -ml-6">
-            <ResponsiveContainer width="100%" height="100%">
+            <ResponsiveContainer width={"100%"} height={"100%"}>
               <AreaChart
                 data={[
                   { name: "Jan", revenue: stats.totalRevenue * 0.4 },
@@ -110,7 +110,7 @@ export default function AdminHomeClient({ stats }) {
                   { name: "Mar", revenue: stats.totalRevenue * 0.62 },
                   { name: "Apr", revenue: stats.totalRevenue * 0.8 },
                   { name: "May", revenue: stats.totalRevenue * 0.95 },
-                  { name: "Jun", revenue: stats.totalRevenue }, // Current gross scale
+                  { name: "Jun", revenue: stats.totalRevenue },
                 ]}
                 margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
               >

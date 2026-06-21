@@ -1,18 +1,19 @@
 import React from "react";
 import { getUsers } from "@/lib/api/users";
 import { getStartup } from "@/lib/api/startups";
-import { getAllOpportunities } from "@/lib/api/opportunities";
 import { getPayments } from "@/lib/api/payments";
 import AdminHomeClient from "@/components/admin/AdminHomeClient";
+import { getAllOpportunities } from "@/lib/api/opportunities";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminDashboardHome() {
   // Parallel asynchronous fetching directly out of backend collection pipelines
-  const [users, startups, opportunities, payments] = await Promise.all([
+  const [users, startups, opportunitiesResponse, payments] = await Promise.all([
     getUsers().catch(() => []),
     getStartup().catch(() => []),
-    getAllOpportunities().catch(() => []),
+    // Update the catch fallback to match the backend's new paginated object structure
+    getAllOpportunities("").catch(() => ({ opportunities: [], total: 0 })),
     getPayments().catch(() => []),
   ]);
 
@@ -25,7 +26,8 @@ export default async function AdminDashboardHome() {
   const statisticalPayload = {
     totalUsers: users.length,
     totalStartups: startups.length,
-    totalOpportunities: opportunities.length,
+    // Use the exact 'total' count returned by your backend's $facet aggregation!
+    totalOpportunities: opportunitiesResponse.total || 0,
     totalRevenue: totalRevenueSum,
   };
 
